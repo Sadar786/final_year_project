@@ -6,7 +6,7 @@ import Comments from "./Comments";
 import { useNavigate } from "react-router-dom";
 import {HiOutlineExclamationCircle } from 'react-icons/hi'
 
-export default function CommentSection({ postId }) {
+export default function CommentSection({ shop }) {
   const { currentUser } = useSelector((state) => state.user);
   const [comment, setComment] = useState("");
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export default function CommentSection({ postId }) {
         },
         body: JSON.stringify({
           content: comment,
-          postId,
+          postId: shop._id,
           userId: currentUser._id,
         }),
       });
@@ -56,7 +56,7 @@ export default function CommentSection({ postId }) {
   useEffect(() => {
     const getComments = async () => {
       try {
-        const res = await fetch(`/api/comment/getComment/${postId}/${currentUser._id}`);
+        const res = await fetch(`/api/comment/getComment/${shop._id}/${currentUser._id}`);
         const data = await res.json();
 
         if (res.ok) {
@@ -74,7 +74,7 @@ export default function CommentSection({ postId }) {
     };
 
     getComments();
-  }, [postId]);
+  }, [shop._id]);
 
   const handleLike = async (commentId) => {
     try {
@@ -178,6 +178,7 @@ export default function CommentSection({ postId }) {
             <Comments
               key={comment._id}
               comment={comment}
+              shop={shop}
               onLike={handleLike}
               onEdit={handleEdit}
 

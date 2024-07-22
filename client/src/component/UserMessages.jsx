@@ -106,6 +106,7 @@ export default function UserMessages() {
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     <span  onClick={()=> {
                       goToChat(message.customerData)
+                      console.log("customer id from user ggg messagase: "+message.customerData._id)
                     }}>
 
                     {message.customerData?.username || "Unknown"}

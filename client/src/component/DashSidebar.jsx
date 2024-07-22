@@ -11,8 +11,15 @@ import {
   HiCalendar,
   HiSpeakerphone,
   HiTemplate,
+  HiOutlinePencil
 } from "react-icons/hi";
-import { FaChartLine, FaBox, FaTags, FaShoppingCart, FaTag } from 'react-icons/fa'; 
+import {
+  FaChartLine,
+  FaBox,
+  FaTags,
+  FaShoppingCart,
+  FaTag,
+} from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { signOutSuccess } from "../redex/user/userSlice";
@@ -218,6 +225,19 @@ export default function DashSidebar() {
               </Sidebar.Item>
             </Link>
           )}
+
+          {currentUser.haveAShop && (
+            <Link to="/dashboard?tab=usermessages">
+              <Sidebar.Item
+                active={tab === "usermessages"}
+                icon={HiOutlinePencil}
+                className="cursor-pointer"
+                as="div"
+              >
+                Users Messages
+              </Sidebar.Item>
+            </Link>
+          )}
           {currentUser.isAdmin && (
             <Link to="/dashboard?tab=users">
               <Sidebar.Item
@@ -227,18 +247,6 @@ export default function DashSidebar() {
                 as="div"
               >
                 Users
-              </Sidebar.Item>
-            </Link>
-          )}
-          {currentUser.haveAShop && (
-            <Link to="/dashboard?tab=usermessages">
-              <Sidebar.Item
-                active={tab === "usermessages"}
-                icon={HiOutlineUserGroup}
-                className="cursor-pointer"
-                as="div"
-              >
-                Users Messages
               </Sidebar.Item>
             </Link>
           )}

@@ -22,6 +22,10 @@ const commentSchema = mongoose.Schema(
             type: Number,
             default: 0,
         },
+        replyByShop:{
+            type: Boolean,
+            default: false,
+        },
         
     },
     {

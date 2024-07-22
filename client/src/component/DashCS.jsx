@@ -1,62 +1,81 @@
 import { Alert, Button, Textarea, Modal } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Comments from "./Comments";
 import { useNavigate } from "react-router-dom";
 import {HiOutlineExclamationCircle } from 'react-icons/hi'
 
-export default function DashCS({ userId }) {
+export default function DashCS() {
   const { myShop } = useSelector((state) => state.shop);
   const [comment, setComment] = useState("");
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false)
   const [commentToDelete, setCommentToDelete] = useState(null)
-
   const [commentError, setCommentError] = useState(null);
   const [comments, setComments] = useState([]);
+  const [createMsg, setCreateMsg] = useState({})
+  const location = useLocation();
+
+  const {user} = location.state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(comment.length === 0){
-      alert("add message first");
+  
+    if (comment.length === 0) {
+      alert("Add a message first");
       return;
     }
-
+  
     if (comment.length > 200) {
+      alert("Message is too long");
       return;
     }
-
+  
     try {
+      let userId = null;
+      if (user && user._id) {
+        userId = user._id;
+        console.log("User ID:", userId);
+      } else {
+        console.log("User object or _id property is undefined.");
+      }
+  
+      const sendData = {
+        content: comment,
+        userId: userId,
+        postId: myShop._id,
+        replyByShop: true,
+      };
+  
       const res = await fetch("/api/comment/createComment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          content: comment,
-          userId,
-          postId: myShop._id,
-        }),
+        body: JSON.stringify(sendData),
       });
-
+  
       const data = await res.json();
-
+  
       if (res.ok) {
         setCommentError(null);
         setComment("");
         setComments([data, ...comments]);
+      } else {
+        setCommentError(data.message || 'An error occurred');
       }
     } catch (error) {
       console.log(error.message);
       setCommentError(error.message);
     }
   };
-
+  
+  console.log("this is DashCS shopID  : " + myShop._id  +"  "+ user._id)
   useEffect(() => {
     const getComments = async () => {
       try {
-        const res = await fetch(`/api/comment/getComment/${myShop._id}/${userId}`);
+        const res = await fetch(`/api/comment/getComment/${myShop._id}/${user._id}`);
         const data = await res.json();
 
         if (res.ok) {
@@ -74,7 +93,7 @@ export default function DashCS({ userId }) {
     };
 
     getComments();
-  }, [postId]);
+  }, [myShop._id]);
 
   const handleLike = async (commentId) => {
     try {
@@ -99,7 +118,7 @@ export default function DashCS({ userId }) {
         console.error("Failed to like the comment");
       }
     } catch (error) {
-      console.log(error);
+      console.log("error "+ error);
     }
   };
 
@@ -141,7 +160,7 @@ export default function DashCS({ userId }) {
           <p>Signed in as:</p>
           {myShop.profilePicture ? (
             <img
-              src={myShop.profilePicture}
+              src={user.profilePicture}
               className="w-5 h-5 rounded-full object-cover"
               alt="User avatar"
             />
@@ -152,7 +171,7 @@ export default function DashCS({ userId }) {
             to="/dashboard?tab=profile"
             className="text-xs text-cyan-600 hover:underline"
           >
-            @{myShop.username || "Unknown User"}
+            @{user.username || "Unknown User"}
           </Link>
         </div>
       ) : (
@@ -178,6 +197,7 @@ export default function DashCS({ userId }) {
             <Comments
               key={comment._id}
               comment={comment}
+              shop={myShop}
               onLike={handleLike}
               onEdit={handleEdit}
 

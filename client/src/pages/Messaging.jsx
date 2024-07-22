@@ -19,7 +19,7 @@ const Messaging = () => {
         </div>
       </div>
 
-      <CommentSection postId={shop._id} />
+      <CommentSection shop={shop} />
     </div>
   );
 };

@@ -8,17 +8,24 @@ import Comment from '../modules/comment.model.js'
 export const createComment = async (req, res, next) => {
    try {
     
-    const {content, postId, userId} = req.body;
+    const {content, postId, userId, replyByShop} = req.body;
     
-    if(userId !== req.user.id){
-        return next(errorHandler(403, "Your are not allowed to create this comment"))
+    const newCom = {};
+
+    if(content) {
+      newCom.content = content
+    }
+    if(postId) {
+      newCom.postId = postId
+    }
+    if(userId) {
+      newCom.userId = userId
+    }
+    if(replyByShop) {
+      newCom.replyByShop = replyByShop
     }
 
-    const newComment = new Comment({
-        content,
-        postId,
-        userId,
-    })
+    const newComment = new Comment(newCom)
     await newComment.save();
 
     res.status(200).json(newComment)
@@ -40,7 +47,7 @@ export const getComment = async (req, res, next) => {
       res.status(200).json(comments);
     }
     else{
-      res.status(500).json({message: "something want wrong"})
+      res.status(500).json({message: "something want wrong" +"  post id : "+ postId + "  user id " + userId})
     }
   } catch (error) {
     next(error)
@@ -52,7 +59,7 @@ export const getComments = async (req, res, next) => {
    const query = {};
 
    if(postId){query.postId = postId}
-     const comments = await Comment.find(query).sort({createAt: -1})
+     const comments = await Comment.find(query).sort({createAt:-1})
     if(comments.length>0){
       res.status(200).json(comments);
     }

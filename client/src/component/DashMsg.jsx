@@ -23,7 +23,7 @@ const Messaging = () => {
         </div>
       </div>
 
-      <DashMsg userId={myShop._id} />
+      <DashMsg userId={user} />
     </div>
   );
 };
