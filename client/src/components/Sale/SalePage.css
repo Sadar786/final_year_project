@@ -1,0 +1,13 @@
+/* SalePage.css */
+
+/* Swiper customizations */
+.swiper-container {
+    padding: 10px 0;
+  }
+  
+  .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  

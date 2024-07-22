@@ -1,0 +1,452 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, Table, Modal, Select } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { Link, useNavigate } from "react-router-dom";
+import TODetaile from "../pages/TODetaile";
+import { useLocation } from "react-router-dom";
+import { FaCheck, FaTimes } from "react-icons/fa";
+
+export default function MyTailoring() {
+  const { currentUser } = useSelector((state) => state.user);
+  const { myShop } = useSelector((state) => state.shop);
+  const [MyTailoring, setMyTailoring] = useState([]);
+  const [showMore, setShowMore] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
+  const [tailoringIdToDelete, setTailoringIdToDelete] = useState("");
+  const [tailoringsIdToUpdate, setTailoringsIdToUpdate] = useState("");
+  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const [updateData, setUpdateDate] = useState({});
+  const [showModalApprove, setShowModalApprove] = useState(false);
+  const navigate = useNavigate();
+  const { tailoring } = useLocation().state || {};
+  const [showTailors, setShowTailors] = useState(false);
+  const [tailors, setTailors] = useState([]);
+  const [orderIdToAssign, setOrderIdToAssign] = useState("");
+  const [employeeIdToUpdate, setEmployeeIdToUpdate] = useState("");
+  const [tailorName, setTailorName] = useState('');
+  const [orderStatus, setOrderStatus] = useState('')
+  let employeeUpdateData = {};
+
+  employeeUpdateData = {
+    ...employeeUpdateData,
+    orderIdToAssign: orderIdToAssign,
+  };
+
+  useEffect(() => {
+    setError(null);
+    const fetchMyTailoring = async () => {
+      try {
+        const response = await fetch(
+          `/api/tailoring/getMyTailorings/${myShop._id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch MyTailoring");
+        }
+        const data = await response.json();
+        setMyTailoring(data);
+
+        if (data.length < 9) {
+          setShowMore(false);
+        }
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    if (currentUser.haveAShop) {
+      fetchMyTailoring();
+    }
+  }, [currentUser, myShop._id]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await fetch(
+          `/api/employee/getEmployees?shopId=${myShop._id}`
+        );
+        if (!res.ok) {
+          throw new Error("Failed to fetch MyTailoring");
+        }
+        const data = await res.json();
+        setTailors(data.Employees);
+        if (data.Employees.length > 0) {
+          console.log("tailors from fetchEmployees " + tailors[0].name);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    if (currentUser.haveAShop) {
+      fetchEmployees();
+    }
+  }, [currentUser, myShop._id, tailors.length]);
+
+  useEffect(() => {
+    setError(null);
+    const fetchCustomerData = async () => {
+      const tailoringsWithCustomers = await Promise.all(
+        MyTailoring.map(async (tailoring) => {
+          const res = await fetch(`/api/user/getUser/${tailoring.customerId}`);
+          const data = await res.json();
+          return { ...tailoring, customerData: data };
+        })
+      );
+      setMyTailoring(tailoringsWithCustomers);
+    };
+
+    if (MyTailoring.length > 0) {
+      fetchCustomerData();
+    }
+  }, [MyTailoring.length]);
+
+  const handleShowMore = async () => {
+    setError(null);
+    const startIndex = MyTailoring.length;
+
+    try {
+      const res = await fetch(
+        `/api/tailoring/getTailoring?shopId=${myShop._id}&startIndex=${startIndex}`
+      );
+      const data = await res.json();
+
+      if (res.ok) {
+        if (Array.isArray(data.tailorings)) {
+          setMyTailoring((prev) => [...prev, ...data.tailorings]);
+          if (data.tailorings.length < 9) {
+            setShowMore(false);
+          }
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } else {
+        throw new Error("Failed to fetch tailorings");
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleDeletetailorings = async () => {
+    setError(null);
+    setShowModal(false);
+    console.log("The id to be deleted: " + tailoringIdToDelete);
+    try {
+      const res = await fetch(
+        `/api/tailoring/deleteTailoring/${tailoringIdToDelete}/${currentUser._id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message);
+      } else {
+        await removeTailoringOrderFromEmployeeOnDelete();
+        setMyTailoring((prev) =>
+          prev.filter((tailoring) => tailoring._id !== tailoringIdToDelete)
+        );
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleApproval = async () => {
+    setError(null);
+    try {
+      console.log("approval method is called");
+      const res = await fetch(
+        `/api/tailoring/updateTailoring/${tailoringsIdToUpdate}/${currentUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
+      if (res.ok) {
+        const updatedtailoring = await res.json();
+        setMyTailoring((prevtailorings) =>
+          prevtailorings.map((tailoring) =>
+            tailoring._id === updatedtailoring._id
+              ? updatedtailoring
+              : tailoring
+          )
+        );
+      } else {
+        const error = await res.json();
+        setError(error.message);
+      }
+    } catch (error) {
+      console.log("something went wrong " + error.message);
+    }
+  };
+
+  const handleViewOrder = (tailoring) => {
+    navigate("/tailoring", { state: { tailoring } });
+  };
+
+  const goToMeasurement = () => {
+    navigate(`/addtailoring/${myShop._id}`);
+  };
+
+  const markOrderAssign = async () => {
+    let updatedOrder = {};
+    updatedOrder = {
+      ...updatedOrder,
+      assignToTailor: true,
+      tailorName: tailorName,
+      tailorId: tailoringsIdToUpdate
+    };
+    try {
+      console.log("approval method is called");
+      const res = await fetch(
+        `/api/tailoring/updateTailoring/${tailoringsIdToUpdate}/${currentUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedOrder),
+        }
+      );
+      if (res.ok) {
+        const markedAssigned = await res.json();
+        setMyTailoring((prevtailorings) =>
+          prevtailorings.map((tailoring) =>
+            tailoring._id === markedAssigned._id ? markedAssigned : tailoring
+          )
+        );
+      } else {
+        const error = await res.json();
+        setError(error.message);
+      }
+    } catch (error) {
+      console.log("something went wrong " + error.message);
+    }
+  };
+
+  const handleAssignToTailor = async () => {
+    try {
+      const res = await fetch(
+        `/api/employee/updateEmployee/${employeeIdToUpdate}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(employeeUpdateData),
+        }
+      );
+
+      if (!res.ok) {
+        console.log("Some error occurred: " + res.statusText);
+        return;
+      }
+
+      const data = await res.json();
+      await markOrderAssign();
+
+      console.log(data);
+       setShowTailors(false);
+    } catch (error) {
+      console.log("Error: " + error.message);
+    }
+  };
+
+  const removeTailoringOrderFromEmployeeOnDelete = async () => {
+    const orderStatusCheck = { orderStatus };
+  
+    try {
+      console.log("tailoringIdToDelete:  " + tailoringIdToDelete);
+      const res = await fetch(`/api/employee/removeTailoringOrderFromEmployee/${employeeIdToUpdate}/${tailoringIdToDelete}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderStatusCheck),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data);
+        console.log("Order is removed from the employee's order list");
+      } else {
+        const errorData = await res.json();
+        console.log("Failed to remove order: " + errorData.message);
+      }
+    } catch (error) {
+      console.log("Error: " + error.message);
+    }
+  };
+
+  const handleSelectChange = (event) => {
+    const { value } = event.target;
+    setEmployeeIdToUpdate(value);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 mt-10">
+      <h1 className="font-extrabold tracking-tight text-gray-900 text-3xl mb-5">
+        My Tailoring
+      </h1>
+      {currentUser.haveAShop ? (
+        <>
+          <Button onClick={goToMeasurement}>Add Tailoring</Button>
+          <div className="overflow-x-auto shadow-md sm:rounded-lg">
+            <Table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3">
+                    Customer Name
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Tailoring Service
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {MyTailoring.map((tailoring) => (
+                  <tr
+                    key={tailoring._id}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <td className="px-6 py-4">
+                      {tailoring.customerData?.name || "Unknown"}
+                    </td>
+                    <td className="px-6 py-4">{tailoring.serviceType}</td>
+                    <td className="px-6 py-4">{tailoring.status}</td>
+                    <td className="px-6 py-4 flex gap-2">
+                      <Button
+                        size="xs"
+                        onClick={() => handleViewOrder(tailoring)}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="xs"
+                        color="failure"
+                        onClick={() => {
+                          setTailoringIdToDelete(tailoring._id);
+                          setShowModal(true);
+                          setOrderStatus(tailoring.status)
+                          setEmployeeIdToUpdate(tailoring.tailorId || ''); // Ensure tailorId is set
+                        }}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        size="xs"
+                        onClick={() => {
+                          setTailoringsIdToUpdate(tailoring._id);
+                          setShowModalApprove(true);
+                          setUpdateDate({ status: "Approved" });
+                        }}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="xs"
+                        onClick={() => {
+                          setTailoringsIdToUpdate(tailoring._id);
+                          setShowTailors(true);
+                          setOrderIdToAssign(tailoring._id);
+                          setTailorName(tailoring.tailorName || ''); // Ensure tailorName is set
+                        }}
+                      >
+                        Assign to Tailor
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {showMore && (
+            <Button
+              outline={true}
+              gradientDuoTone="greenToBlue"
+              onClick={handleShowMore}
+            >
+              Show More
+            </Button>
+          )}
+        </>
+      ) : (
+        <p>You don't have a shop yet.</p>
+      )}
+      {error && <p className="text-red-500">{error}</p>}
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        <Modal.Header>
+          <HiOutlineExclamationCircle className="h-5 w-5 text-red-500" />
+          Confirm Deletion
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete this tailoring?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="failure" onClick={handleDeletetailorings}>
+            Delete
+          </Button>
+          <Button color="light" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showModalApprove} onClose={() => setShowModalApprove(false)}>
+        <Modal.Header>
+          <FaCheck className="h-5 w-5 text-green-500" />
+          Confirm Approval
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to approve this tailoring?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="success" onClick={handleApproval}>
+            Approve
+          </Button>
+          <Button color="light" onClick={() => setShowModalApprove(false)}>
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showTailors} onClose={() => setShowTailors(false)}>
+        <Modal.Header>
+          <FaTimes className="h-5 w-5 text-red-500" />
+          Assign Tailor
+        </Modal.Header>
+        <Modal.Body>
+          <p>Select a tailor to assign this order:</p>
+          <Select onChange={handleSelectChange} value={employeeIdToUpdate}>
+            {tailors.map((tailor) => (
+              <option key={tailor._id} value={tailor._id}>
+                {tailor.name}
+              </option>
+            ))}
+          </Select>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="success" onClick={handleAssignToTailor}>
+            Assign
+          </Button>
+          <Button color="light" onClick={() => setShowTailors(false)}>
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
+}
