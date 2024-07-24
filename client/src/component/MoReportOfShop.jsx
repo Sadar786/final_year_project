@@ -3,6 +3,9 @@ import { Button, Table } from "flowbite-react";
 import { useSelector } from "react-redux";
 import EmployeeReport from "./EmployeeReport";
 import { HiArrowSmRight } from "react-icons/hi";
+import GeneratePdf from '../component/GereratePdf'
+
+
 const MonthlyReport = () => {
   const [reportData, setReportDataOfOrder] = useState([]);
   const [employeeData, setEmployeeData] = useState({
@@ -106,6 +109,9 @@ const MonthlyReport = () => {
     }
     console.log(changeReport);
   };
+
+
+  
 
   return (
     <div className=" lg:flex flex-col justify-center items-center w-full table-auto overflow-x-scroll md:ax-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500">

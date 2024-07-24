@@ -157,6 +157,15 @@ export default function AddOrder() {
               setFormData({ ...formData, costumerAddress: e.target.value })
             }
           />
+          <TextInput
+            type="text"
+            placeholder="Servsice type"
+            required
+            className="flex-1"
+            onChange={(e) =>
+              setFormData({ ...formData, serT: e.target.value })
+            }
+          />
         <Select
           value={formData.paymentMethod}
           onChange={(e) =>

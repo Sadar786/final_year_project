@@ -19,6 +19,10 @@ const tailoringSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  serT: {
+    type: String,
+    required: true
+  },
   customerContact: {
     type: String,
     default: '00000000000'

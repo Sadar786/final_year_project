@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "flowbite-react";
 import { useLocation, Link } from "react-router-dom";
 
 const TailoringDetail = () => {
   const location = useLocation();
   const { tailoring } = location.state || {};
+  const [user, setUser] = useState([])
 
   if (!tailoring) {
     console.log("Tailoring data is not being passed correctly or not present");
@@ -18,6 +19,10 @@ const TailoringDetail = () => {
       tailoring.customerName
   );
 
+
+
+
+
   return (
     <div className=" items-center mt-5 mb-4 sm:flex flex-col justify-center  overflow-x-auto">
       {/* main Table */}
@@ -26,6 +31,7 @@ const TailoringDetail = () => {
         <Table.Head>
           <Table.HeadCell>Customer Name</Table.HeadCell>
           <Table.HeadCell>Address</Table.HeadCell>
+          <Table.HeadCell>message</Table.HeadCell>
           <Table.HeadCell>Tailoring Status</Table.HeadCell>
           <Table.HeadCell>
             <span className="dark:text-green-300 text-pink-600">
@@ -41,6 +47,7 @@ const TailoringDetail = () => {
               {tailoring.customerName}
             </Table.Cell>
             <Table.Cell>{tailoring.costumerAddress}</Table.Cell>
+            <Table.Cell>{tailoring.serT}</Table.Cell>
             <Table.Cell>{tailoring.status}</Table.Cell>
             <Table.Cell>
               <span className="dark:text-green-300 text-pink-600">

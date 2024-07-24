@@ -142,18 +142,18 @@ export default function CommentSection({ shop }) {
           {currentUser.profilePicture ? (
             <img
               src={currentUser.profilePicture}
-              className="w-5 h-5 rounded-full object-cover"
+              className="w-4 h-4 rounded-full object-cover"
               alt="User avatar"
             />
           ) : (
             <div>No image</div>
           )}
-          <Link
-            to="/dashboard?tab=profile"
+          <div
+
             className="text-xs text-cyan-600 hover:underline"
           >
             @{currentUser.username || "Unknown User"}
-          </Link>
+          </div>
         </div>
       ) : (
         <div className="text-teal-500 flex gap-1 text-sm my-5">

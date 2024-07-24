@@ -73,10 +73,10 @@ export default function ShopPage() {
 
   const goToMessaging = (shop) => {
     if (currentUser) {
-      navigate('/messaging', { state: { shop: shop } });
+      navigate("/messaging", { state: { shop: shop } });
     } else {
       alert("Buddy, you have to sign in first to send a message.");
-      navigate('/signin');
+      navigate("/signin");
     }
   };
 
@@ -134,9 +134,7 @@ export default function ShopPage() {
                 <p>
                   Location: {shop.location ? shop.location : "Not Available"}
                 </p>
-                <p>
-                  Contact: {shop.contact ? shop.contact : "Not Available"}
-                </p>
+                <p>Contact: {shop.contact ? shop.contact : "Not Available"}</p>
               </div>
               {shop && shop.content ? (
                 <>
@@ -153,30 +151,38 @@ export default function ShopPage() {
               )}
             </main>
           )}
-          <div className="max-w-2xl items-center justify-center flex mx-auto b mb-3">
+          <div className="max-w-2xl p-1 text-xl font-bold items-center justify-center flex mx-auto b mb-3">
             Submit your body measurement to get your custom size suit.
           </div>
         </div>
       )}
 
-      <div className="flex justify-center gap-10 px-4">
-        <div>
+      <div className="flex w-full justify-center">
+        <div className=" flex md:w-6/12 w-full justify-between px-4">
+             <button
+              onClick={() => goToMeasurement(shop._id)}
+              className="bg-gradient-to-r mb-3 justify-between from-primary to-secondary
+                    hover:scale-105 duration-200 text-xs sm:text-sm text-white py-2 px-4 rounded-full"
+            >
+              Submit Now
+            </button>
           <button
-            onClick={() => goToMeasurement(shop._id)}
-            className="bg-gradient-to-r from-primary to-secondary
+            onClick={() => goToMessaging(shop)}
+            className="bg-gradient-to-r mb-3 text-xs sm:text-sm justify-between from-primary to-secondary
                     hover:scale-105 duration-200 text-white py-2 px-4 rounded-full"
           >
-            Start Now
+            Message Now
           </button>
-        </div>
-        <button
-          onClick={() => goToMessaging(shop)}
-          className="bg-gradient-to-r from-primary to-secondary
-                  hover:scale-105 duration-200 text-white py-2 px-4 rounded-full"
-        >
-          Message Now
-        </button>
+         </div>
+        
       </div>
+      {
+     //  ( shop.category === "Tailor" || shop.category === "Tailor") &&
+      }
+      <div className=" flex rounded-md justify-center items-center flex-col ">
+      <iframe className="rounded-md" width="460" height="215" src="https://www.youtube.com/embed/uat4BpIzgx8?si=XYoJtMbvTjl7Vorx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <p className="text-sm mt-2 font-semibold">Video for guide how to Take measurement</p>
+         </div>
       {/* <div>{shop && <CommentSection postId={shop._id} />}</div> */}
       <div className="flex flex-col justify-center items-center mb-5 ">
         <h1 className="text-xl mt-5">Recent Products</h1>

@@ -22,12 +22,12 @@ const FooterLinks = [
         link: '/about',
     },
     {
-        title: 'Contact',
-        link: '/#contact',
+        title: 'Shops',
+        link: '/searchshops',
     },
     {
-        title: 'Blog',
-        link: '/#blog',
+        title: 'Sale',
+        link: '/sale',
     },
 ];
 
@@ -41,7 +41,7 @@ const Footer = () => {
                         <h1 className="sm:text-3xl text-xl font-bold sm:text-left text-justify mb-3 flex items-center gap-3">
                             <a href="#" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity duration-300">
                                 <img src={footerLogo} alt="Shopsy" className="max-w-[50px]" />
-                                <span>Shopsy</span>
+                                <span>Fuel Fashion</span>
                             </a>
                         </h1>
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias, tempore molestias. Amet dicta nihil architecto?</p>
