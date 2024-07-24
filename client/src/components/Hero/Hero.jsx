@@ -79,11 +79,13 @@ const Hero = () => {
                     data-aos-once="true"
                     className="text-5xl sm:text-6xl lg:text-7xl font-bold"
                   >
-                    {/* {data.discount}% off on {' '} {data.name} */}
-                    Govern tax {
+
+                    {data.discount}% off on {data.name}
+                    {/* this code was for test only by teacher */}
+                    {/* Govern tax {
                       (taxGov = parseInt((10 / 100) * data.price))
                     }{" "}
-                    Total price {parseInt(data.price + taxGov)}
+                    Total price {parseInt(data.price + taxGov)} */}
                   </h1>
                   <p
                     data-aos="fade-up"
